@@ -35,6 +35,69 @@ services:
     depends_on:
       - marquez-db
 
+  minio:
+    image: minio/minio:latest
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: password
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      - minio
+    environment:
+      AWS_ACCESS_KEY_ID: admin
+      AWS_SECRET_ACCESS_KEY: password
+      AWS_REGION: us-east-1
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set minio http://minio:9000 admin password; do sleep 1; done;
+      mc mb minio/warehouse --ignore-existing;
+      mc anonymous set public minio/warehouse;
+      echo 'MinIO warehouse bucket ready';
+      "
+
+  iceberg-rest:
+    image: apache/iceberg-rest-fixture:latest
+    depends_on:
+      - minio-init
+    ports:
+      - "8181:8181"
+    environment:
+      AWS_ACCESS_KEY_ID: admin
+      AWS_SECRET_ACCESS_KEY: password
+      AWS_REGION: us-east-1
+      CATALOG_CATALOG_NAME: rest
+      CATALOG_WAREHOUSE: s3://warehouse/
+      CATALOG_IO__IMPL: org.apache.iceberg.aws.s3.S3FileIO
+      CATALOG_S3_ENDPOINT: http://minio:9000
+      CATALOG_S3_PATH__STYLE__ACCESS: "true"
+
+  iceberg-init:
+    image: python:3.12-slim
+    depends_on:
+      - iceberg-rest
+    volumes:
+      - .:/opt/lakehouse
+    working_dir: /opt/lakehouse
+    environment:
+      ICEBERG_CATALOG_URI: http://iceberg-rest:8181
+      ICEBERG_S3_ENDPOINT: http://minio:9000
+      AWS_ACCESS_KEY_ID: admin
+      AWS_SECRET_ACCESS_KEY: password
+      AWS_REGION: us-east-1
+    entrypoint: >
+      /bin/sh -c "
+      pip install --no-cache-dir 'pyiceberg[pyarrow,s3fs]>=0.7.0' pyarrow &&
+      until python storage/iceberg/scripts/init_catalog.py; do echo 'Waiting for Iceberg REST...'; sleep 3; done
+      "
+
   airflow-init:
     image: apache/airflow:3.1.0-python3.12
     environment:
@@ -43,18 +106,27 @@ services:
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       AIRFLOW__OPENLINEAGE__TRANSPORT: '{"type":"http","url":"http://marquez:5000/api/v1/lineage","endpoint":"api/v1/lineage"}'
       AIRFLOW__OPENLINEAGE__NAMESPACE: local.lakehouse-platform
+      DUCKDB_PATH: /opt/lakehouse/storage/warehouse/dev.duckdb
+      ICEBERG_CATALOG_URI: http://iceberg-rest:8181
+      ICEBERG_S3_ENDPOINT: http://minio:9000
+      AWS_ACCESS_KEY_ID: admin
+      AWS_SECRET_ACCESS_KEY: password
+      AWS_REGION: us-east-1
     volumes:
+      - .:/opt/lakehouse
       - ./orchestration/airflow/dags:/opt/airflow/dags
       - ./orchestration/airflow/config:/opt/airflow/config
     entrypoint: /bin/bash
     command:
       - -c
       - |
+        pip install --no-cache-dir -r /opt/lakehouse/orchestration/airflow/requirements.txt
         airflow db migrate
         airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com || true
     depends_on:
       - postgres
       - marquez
+      - iceberg-init
 
   airflow:
     image: apache/airflow:3.1.0-python3.12
@@ -66,7 +138,14 @@ services:
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       AIRFLOW__OPENLINEAGE__TRANSPORT: '{"type":"http","url":"http://marquez:5000/api/v1/lineage","endpoint":"api/v1/lineage"}'
       AIRFLOW__OPENLINEAGE__NAMESPACE: local.lakehouse-platform
+      DUCKDB_PATH: /opt/lakehouse/storage/warehouse/dev.duckdb
+      ICEBERG_CATALOG_URI: http://iceberg-rest:8181
+      ICEBERG_S3_ENDPOINT: http://minio:9000
+      AWS_ACCESS_KEY_ID: admin
+      AWS_SECRET_ACCESS_KEY: password
+      AWS_REGION: us-east-1
     volumes:
+      - .:/opt/lakehouse
       - ./orchestration/airflow/dags:/opt/airflow/dags
       - ./orchestration/airflow/config:/opt/airflow/config
     command: standalone
@@ -76,3 +155,4 @@ services:
 volumes:
   postgres_data:
   marquez_data:
+  minio_data:
