@@ -30,6 +30,9 @@ jobs:
       - name: Install dbt
         run: pip install dbt-duckdb duckdb
 
+      - name: Prepare warehouse directory
+        run: mkdir -p storage/warehouse
+
       - name: Build project and generate docs
         working-directory: transform/dbt
         run: |

@@ -21,6 +21,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install dbt-duckdb duckdb
+      - run: mkdir -p storage/warehouse
       - run: dbt deps
       - run: dbt seed
       - run: dbt build
@@ -36,6 +37,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install dbt-duckdb duckdb great-expectations
+      - run: mkdir -p storage/warehouse
       - run: python -m unittest tests.test_pipeline -v
 
   airflow-dag-parse:
