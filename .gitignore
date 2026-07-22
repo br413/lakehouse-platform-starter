@@ -1,0 +1,24 @@
+# Local / generated
+.env
+*.duckdb
+__pycache__/
+.venv/
+.dbt_venv/
+target/
+dbt_packages/
+logs/
+*.log
+transform/dbt/.user.yml
+
+# Airflow
+orchestration/airflow/logs/
+orchestration/airflow/plugins/__pycache__/
+
+# Terraform
+infra/terraform/**/.terraform/
+*.tfstate
+*.tfstate.*
+
+# IDE
+.idea/
+.vscode/

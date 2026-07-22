@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: stg_events
+    description: Cleaned bronze events with typed columns and event_date partition key
+    columns:
+      - name: event_id
+        description: Unique event identifier from source system
+        tests:
+          - unique
+          - not_null
+      - name: event_type
+        description: Event category (page_view, signup, purchase)
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["page_view", "signup", "purchase"]
+      - name: event_timestamp
+        description: UTC timestamp when the event occurred
+        tests:
+          - not_null
+      - name: user_id
+        description: Anonymous user identifier
+        tests:
+          - not_null
+      - name: event_date
+        description: Date partition key derived from event_timestamp
+        tests:
+          - not_null

@@ -1,0 +1,11 @@
+id,event_type,event_timestamp,user_id,payload
+evt-001,page_view,2026-01-15T08:12:00Z,user-101,"{""page"": ""/home""}"
+evt-002,page_view,2026-01-15T09:30:00Z,user-102,"{""page"": ""/pricing""}"
+evt-003,signup,2026-01-15T10:05:00Z,user-103,"{""plan"": ""free""}"
+evt-004,page_view,2026-01-16T11:20:00Z,user-101,"{""page"": ""/docs""}"
+evt-005,purchase,2026-01-16T14:45:00Z,user-103,"{""amount"": 49.99}"
+evt-006,page_view,2026-01-17T07:55:00Z,user-104,"{""page"": ""/home""}"
+evt-007,signup,2026-01-17T12:10:00Z,user-104,"{""plan"": ""pro""}"
+evt-008,page_view,2026-01-18T16:00:00Z,user-102,"{""page"": ""/blog""}"
+evt-009,purchase,2026-01-18T18:22:00Z,user-104,"{""amount"": 99.00}"
+evt-010,page_view,2026-01-19T09:00:00Z,user-105,"{""page"": ""/home""}"

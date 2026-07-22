@@ -1,0 +1,28 @@
+version: 2
+
+models:
+  - name: fct_daily_events
+    description: Daily event aggregates by type — primary mart for analytics
+    columns:
+      - name: event_date
+        description: Calendar date of events
+        tests:
+          - not_null
+      - name: event_type
+        description: Event category
+        tests:
+          - not_null
+      - name: event_count
+        description: Total events on this date and type
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "> 0"
+      - name: unique_users
+        description: Distinct users with at least one event
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "> 0"

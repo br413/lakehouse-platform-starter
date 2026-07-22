@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  dbt-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: transform/dbt
+    env:
+      DUCKDB_PATH: ${{ github.workspace }}/storage/warehouse/dev.duckdb
+      DBT_PROFILES_DIR: ${{ github.workspace }}/transform/dbt
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install dbt-duckdb duckdb
+      - run: dbt deps
+      - run: dbt seed
+      - run: dbt build
+
+  pipeline-test:
+    runs-on: ubuntu-latest
+    env:
+      DUCKDB_PATH: ${{ github.workspace }}/storage/warehouse/dev.duckdb
+      DBT_PROFILES_DIR: ${{ github.workspace }}/transform/dbt
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install dbt-duckdb duckdb great-expectations
+      - run: python -m unittest tests.test_pipeline -v
+
+  airflow-dag-parse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install apache-airflow==3.1.0 astronomer-cosmos>=1.11.0
+      - run: python -m py_compile orchestration/airflow/dags/*.py
+
+  terraform-validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra/terraform
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform init -backend=false
+      - run: terraform validate
+      - run: terraform fmt -check -recursive

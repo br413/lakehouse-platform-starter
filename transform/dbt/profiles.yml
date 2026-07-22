@@ -1,0 +1,7 @@
+lakehouse_platform:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('DUCKDB_PATH', '../../storage/warehouse/dev.duckdb') }}"
+      threads: 4

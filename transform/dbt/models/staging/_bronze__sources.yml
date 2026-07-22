@@ -1,0 +1,17 @@
+version: 2
+
+sources:
+  - name: bronze
+    description: |
+      Bronze layer events. Local dev uses dbt seed (simulates Iceberg bronze.events).
+      Production targets Iceberg REST catalog — see storage/iceberg/.
+    tables:
+      - name: events
+        description: Raw product analytics events
+        columns:
+          - name: id
+            description: Source event identifier
+          - name: event_type
+            description: Event category
+          - name: event_timestamp
+            description: ISO-8601 UTC timestamp
