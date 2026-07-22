@@ -5,3 +5,12 @@ lakehouse_platform:
       type: duckdb
       path: "{{ env_var('DUCKDB_PATH', '../../storage/warehouse/dev.duckdb') }}"
       threads: 4
+    iceberg:
+      type: trino
+      method: none
+      host: "{{ env_var('TRINO_HOST', 'localhost') }}"
+      port: "{{ env_var('TRINO_PORT', '8090') | int }}"
+      user: dbt
+      catalog: iceberg
+      schema: marts
+      threads: 4

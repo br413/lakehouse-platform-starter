@@ -94,9 +94,24 @@ services:
       AWS_REGION: us-east-1
     entrypoint: >
       /bin/sh -c "
-      pip install --no-cache-dir 'pyiceberg[pyarrow,s3fs]>=0.7.0' pyarrow &&
+      pip install --no-cache-dir 'pyiceberg[pyarrow,s3fs]>=0.7.0' pyarrow pandas &&
       until python storage/iceberg/scripts/init_catalog.py; do echo 'Waiting for Iceberg REST...'; sleep 3; done
       "
+
+  trino:
+    image: trinodb/trino:439
+    depends_on:
+      - iceberg-init
+    ports:
+      - "8090:8080"
+    volumes:
+      - ./storage/trino/catalog:/etc/trino/catalog
+      - ./storage/trino/config.properties:/etc/trino/config.properties
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/v1/info || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
 
   airflow-init:
     image: apache/airflow:3.1.0-python3.12
@@ -107,6 +122,9 @@ services:
       AIRFLOW__OPENLINEAGE__TRANSPORT: '{"type":"http","url":"http://marquez:5000/api/v1/lineage","endpoint":"api/v1/lineage"}'
       AIRFLOW__OPENLINEAGE__NAMESPACE: local.lakehouse-platform
       DUCKDB_PATH: /opt/lakehouse/storage/warehouse/dev.duckdb
+      DBT_TARGET: iceberg
+      TRINO_HOST: trino
+      TRINO_PORT: "8080"
       ICEBERG_CATALOG_URI: http://iceberg-rest:8181
       ICEBERG_S3_ENDPOINT: http://minio:9000
       AWS_ACCESS_KEY_ID: admin
@@ -124,9 +142,14 @@ services:
         airflow db migrate
         airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com || true
     depends_on:
-      - postgres
-      - marquez
-      - iceberg-init
+      postgres:
+        condition: service_started
+      marquez:
+        condition: service_started
+      iceberg-init:
+        condition: service_completed_successfully
+      trino:
+        condition: service_healthy
 
   airflow:
     image: apache/airflow:3.1.0-python3.12
@@ -139,6 +162,9 @@ services:
       AIRFLOW__OPENLINEAGE__TRANSPORT: '{"type":"http","url":"http://marquez:5000/api/v1/lineage","endpoint":"api/v1/lineage"}'
       AIRFLOW__OPENLINEAGE__NAMESPACE: local.lakehouse-platform
       DUCKDB_PATH: /opt/lakehouse/storage/warehouse/dev.duckdb
+      DBT_TARGET: iceberg
+      TRINO_HOST: trino
+      TRINO_PORT: "8080"
       ICEBERG_CATALOG_URI: http://iceberg-rest:8181
       ICEBERG_S3_ENDPOINT: http://minio:9000
       AWS_ACCESS_KEY_ID: admin

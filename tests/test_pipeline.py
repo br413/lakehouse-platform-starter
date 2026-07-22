@@ -27,8 +27,8 @@ class PipelineSmokeTest(unittest.TestCase):
 
         run([sys.executable, "ingestion/run_ingest.py"])
         run(["dbt", "deps"], cwd=DBT_DIR)
-        run(["dbt", "seed"], cwd=DBT_DIR)
-        run(["dbt", "build"], cwd=DBT_DIR)
+        run(["dbt", "seed", "--target", "dev"], cwd=DBT_DIR)
+        run(["dbt", "build", "--target", "dev"], cwd=DBT_DIR)
         run([sys.executable, "quality/run_checkpoint.py"])
 
         import duckdb

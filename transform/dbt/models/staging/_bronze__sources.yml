@@ -3,8 +3,9 @@ version: 2
 sources:
   - name: bronze
     description: |
-      Bronze layer events. Local dev uses dbt seed (simulates Iceberg bronze.events).
-      Production targets Iceberg REST catalog — see storage/iceberg/.
+      Bronze layer events. DuckDB dev uses ingest/seed; Iceberg target reads via Trino.
+    database: "{% if target.type == 'trino' %}iceberg{% endif %}"
+    schema: bronze
     tables:
       - name: events
         description: Raw product analytics events

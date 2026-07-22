@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Route bronze ingest to DuckDB (local/CI) or Iceberg REST (Docker full stack)."""
+"""Route bronze ingest based on target: DuckDB, Iceberg bridge, or Iceberg-native."""
 
 from __future__ import annotations
 
@@ -12,7 +12,11 @@ ROOT = Path(__file__).resolve().parent
 
 
 def main() -> None:
-    if os.environ.get("ICEBERG_CATALOG_URI"):
+    target = os.environ.get("DBT_TARGET", "dev")
+
+    if target == "iceberg":
+        subprocess.check_call([sys.executable, str(ROOT / "ingest_events_iceberg.py")])
+    elif os.environ.get("ICEBERG_CATALOG_URI"):
         subprocess.check_call([sys.executable, str(ROOT / "ingest_events_iceberg.py")])
         subprocess.check_call([sys.executable, str(ROOT / "sync_iceberg_to_duckdb.py")])
     else:

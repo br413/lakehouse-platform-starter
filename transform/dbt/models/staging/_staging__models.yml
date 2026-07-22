@@ -14,7 +14,8 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values: ["page_view", "signup", "purchase"]
+              arguments:
+                values: ["page_view", "signup", "purchase"]
       - name: event_timestamp
         description: UTC timestamp when the event occurred
         tests:

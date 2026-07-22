@@ -16,12 +16,14 @@ Built to demonstrate senior data engineering patterns: thin orchestration, obser
 | dbt transform (staging → int → marts) | **Implemented** | Tests, docs site, incremental mart |
 | Local pipeline (ingest → dbt → GE) | **Implemented** | `make pipeline` or `scripts/pipeline.ps1` |
 | Iceberg REST + MinIO | **Implemented** | Docker Compose; PyIceberg ingest |
-| Airflow + Cosmos DbtTaskGroup | **Implemented** | Per-model tasks, virtualenv execution |
+| dbt-trino on Iceberg | **Implemented** | Native lakehouse path via Trino `:8090` |
+| Airflow + Cosmos DbtTaskGroup | **Implemented** | Per-model tasks; `DBT_TARGET=iceberg` in Docker |
 | OpenLineage + Marquez | **Implemented** | Docker Compose |
 | Great Expectations gate | **Implemented** | Blocks publish on mart validation failure |
 | CI + GitHub Pages dbt docs | **Implemented** | [dbt docs site](https://br413.github.io/lakehouse-platform-starter/) |
 | Terraform (S3 + IAM) | **Implemented** | Minimal bronze bucket module |
 | Meltano ingestion | Planned | Python/PyIceberg ingest simulates bronze |
+| Interview walkthrough | **Implemented** | [docs/interview-walkthrough.md](./docs/interview-walkthrough.md) |
 | OpenTelemetry traces | Planned | Lineage via Marquez only |
 | Helm / K8s deploy | Planned | See `infra/terraform/` |
 
@@ -31,10 +33,11 @@ Built to demonstrate senior data engineering patterns: thin orchestration, obser
 flowchart LR
     subgraph ingest [Ingestion]
         A[PyIceberg ingest] --> B[Iceberg bronze.events]
-        B --> C2[DuckDB sync bridge]
     end
     subgraph transform [Transform]
-        C2 --> C[Cosmos dbt TaskGroup]
+        B --> T[Trino]
+        T --> C[Cosmos dbt TaskGroup]
+        B -.->|dev/CI| C2[DuckDB fast path]
     end
     subgraph orchestrate [Orchestration]
         D[Airflow DAG] --> A
@@ -54,7 +57,7 @@ flowchart LR
 2. **OpenLineage as contract** — every task emits lineage; dbt Cloud jobs are first-class RUN parents.
 3. **Backfill safety** — idempotent DAGs, partition keys, incremental marts, documented runbooks.
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) and [docs/decisions/](./docs/decisions/).
+See [ARCHITECTURE.md](./ARCHITECTURE.md), [docs/interview-walkthrough.md](./docs/interview-walkthrough.md), and [docs/decisions/](./docs/decisions/).
 
 ## Quick start (local)
 
@@ -85,7 +88,28 @@ docker compose up -d
 # Trigger DAG:   lakehouse_daily
 ```
 
-Docker mode ingests to Iceberg via REST catalog, syncs bronze to DuckDB for dbt, then Cosmos runs per-model tasks.
+Docker mode uses **`DBT_TARGET=iceberg`**: PyIceberg → Iceberg bronze → **Trino** → dbt-trino → Iceberg marts. No DuckDB bridge.
+
+```bash
+docker compose up -d
+# MinIO console:  http://localhost:9001  (admin / password)
+# Iceberg REST:   http://localhost:8181
+# Trino:          http://localhost:8090
+# Airflow UI:     http://localhost:8080  (admin / admin)
+# Marquez UI:     http://localhost:5000
+# Trigger DAG:   lakehouse_daily
+```
+
+Native Iceberg pipeline (with Docker stack running):
+
+```powershell
+.\scripts\pipeline-iceberg.ps1
+# or: make pipeline-iceberg
+```
+
+### Interview prep
+
+See **[docs/interview-walkthrough.md](./docs/interview-walkthrough.md)** — 30-second pitch, demo script, common questions, and trade-offs.
 
 ### dbt docs
 

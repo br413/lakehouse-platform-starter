@@ -17,14 +17,16 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install dbt-duckdb duckdb
+      - run: pip install dbt-duckdb dbt-trino duckdb
       - run: mkdir -p storage/warehouse
       - run: python ingestion/ingest_events.py
       - run: dbt deps
         working-directory: transform/dbt
-      - run: dbt seed
+      - run: dbt seed --target dev
         working-directory: transform/dbt
-      - run: dbt build
+      - run: dbt build --target dev
+        working-directory: transform/dbt
+      - run: dbt parse --target iceberg
         working-directory: transform/dbt
 
   pipeline-test:
