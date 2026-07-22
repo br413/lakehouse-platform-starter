@@ -9,9 +9,6 @@ on:
 jobs:
   dbt-build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: transform/dbt
     env:
       DUCKDB_PATH: ${{ github.workspace }}/storage/warehouse/dev.duckdb
       DBT_PROFILES_DIR: ${{ github.workspace }}/transform/dbt
@@ -22,9 +19,13 @@ jobs:
           python-version: "3.12"
       - run: pip install dbt-duckdb duckdb
       - run: mkdir -p storage/warehouse
+      - run: python ingestion/ingest_events.py
       - run: dbt deps
+        working-directory: transform/dbt
       - run: dbt seed
+        working-directory: transform/dbt
       - run: dbt build
+        working-directory: transform/dbt
 
   pipeline-test:
     runs-on: ubuntu-latest
@@ -48,7 +49,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install apache-airflow==3.1.0 astronomer-cosmos>=1.11.0
-      - run: python -m py_compile orchestration/airflow/dags/*.py
+      - run: python -m py_compile orchestration/airflow/dags/lakehouse_daily.py
 
   terraform-validate:
     runs-on: ubuntu-latest

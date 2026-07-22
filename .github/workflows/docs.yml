@@ -33,6 +33,11 @@ jobs:
       - name: Prepare warehouse directory
         run: mkdir -p storage/warehouse
 
+      - name: Seed bronze layer
+        run: python ingestion/ingest_events.py
+        env:
+          DUCKDB_PATH: ${{ github.workspace }}/storage/warehouse/dev.duckdb
+
       - name: Build project and generate docs
         working-directory: transform/dbt
         run: |
