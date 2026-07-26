@@ -1,14 +1,33 @@
 # Local / generated
 .env
+.env.*
+!.env.example
 *.duckdb
 __pycache__/
+*.py[cod]
+*$py.class
 .venv/
 .dbt_venv/
+.dbt_venv_*/
 target/
 dbt_packages/
 logs/
 *.log
 transform/dbt/.user.yml
+transform/dbt/target/
+transform/dbt/dbt_packages/
+transform/dbt/logs/
+
+# Python packaging
+*.egg-info/
+.eggs/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
 
 # Airflow
 orchestration/airflow/logs/
@@ -18,7 +37,15 @@ orchestration/airflow/plugins/__pycache__/
 infra/terraform/**/.terraform/
 *.tfstate
 *.tfstate.*
+*.tfvars
+!*.tfvars.example
 
-# IDE
+# IDE / OS
 .idea/
 .vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# CI / docs build
+_site/

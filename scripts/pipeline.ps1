@@ -9,8 +9,8 @@ $env:DBT_PROFILES_DIR = Join-Path $Root "transform\dbt"
 python ingestion/run_ingest.py
 Push-Location transform/dbt
 dbt deps
-dbt seed
-dbt build --select staging+ marts+
+dbt seed --target dev
+dbt build --select staging+ marts+ --target dev
 Pop-Location
 python quality/run_checkpoint.py
 

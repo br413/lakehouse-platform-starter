@@ -31,5 +31,4 @@ python storage/iceberg/scripts/init_catalog.py
 
 ## Ingest
 
-Docker full stack uses `ingestion/ingest_events_iceberg.py` → sync to DuckDB for dbt.  
-Production path: dbt-trino or Spark SQL directly on Iceberg (see ADR-001).
+Docker full stack uses `ingestion/seed_iceberg_bronze.py` and `ingestion/ingest_events_iceberg.py` with `DBT_TARGET=iceberg`. dbt-trino reads and writes marts directly on Iceberg via Trino (see [ADR-001](../../../docs/decisions/001-iceberg-over-delta.md)).

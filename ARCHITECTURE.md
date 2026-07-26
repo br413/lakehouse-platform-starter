@@ -1,17 +1,19 @@
 # Architecture
 
+> **See also:** [README](./README.md) (quick start) · [Interview walkthrough](./docs/interview-walkthrough.md) (demo script) · [ADRs](./docs/decisions/)
+
 ## Stack
 
 | Layer | Tool | Role |
 |-------|------|------|
-| Ingestion | Meltano | EL from APIs/files into bronze |
+| Ingestion | PyIceberg | Bronze writes to Iceberg on MinIO/S3 (Meltano planned) |
 | Storage | Apache Iceberg | Open table format, time travel, multi-engine |
-| Transform | dbt | SQL transformations, tests, docs |
-| Orchestration | Apache Airflow | Schedule, retry, observe — not transform |
+| Query | Trino | Federated SQL over Iceberg (Docker demo) |
+| Transform | dbt (duckdb / trino) | SQL transformations, tests, docs |
+| Orchestration | Apache Airflow + Cosmos | Schedule, retry, observe — not transform |
 | Lineage | OpenLineage + Marquez | Parent/child run semantics across tools |
 | Quality | Great Expectations | Gate mart publish on validation |
-| Observability | OpenTelemetry | Distributed traces on pipeline steps |
-| Infra | Terraform + Helm | Reproducible environments |
+| Infra | Terraform | Bronze S3 bucket + IAM (Helm/K8s planned) |
 
 ## Data flow
 
@@ -33,13 +35,28 @@
 - Column-level transforms
 - Ad-hoc Python ETL (use dbt Python models or Spark instead)
 
-## Environments
+## Environment variables
 
-| Env | Purpose | Notes |
-|-----|---------|-------|
-| `dev` | Local docker-compose | Fake data, full stack |
-| `staging` | Pre-prod validation | Mirrors prod schema |
-| `prod` | Production | `max_active_runs=1` on marts DAG |
+Canonical names used across Makefile, scripts, DAG, and CI:
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `DBT_TARGET` | `dev` | Transform backend: `dev` (DuckDB) or `iceberg` (Trino) |
+| `DUCKDB_PATH` | `storage/warehouse/dev.duckdb` | DuckDB warehouse file (dev target) |
+| `DBT_PROFILES_DIR` | `transform/dbt` | dbt profiles location |
+| `ICEBERG_CATALOG_URI` | — | Iceberg REST catalog URL (Docker: `http://localhost:8181`) |
+| `ICEBERG_S3_ENDPOINT` | — | S3-compatible endpoint (Docker: `http://localhost:9000`) |
+| `TRINO_HOST` / `TRINO_PORT` | — | Trino connection (Docker host: `8090`) |
+
+`DBT_TARGET=iceberg` is set in `docker-compose.yml` for the Airflow stack. Local fast path leaves it at `dev`.
+
+## Targets and environments
+
+| Target / env | Engine | When to use |
+|--------------|--------|-------------|
+| `dev` (dbt) | DuckDB | CI, local smoke test, no Docker (~30s) |
+| `iceberg` (dbt) | Trino + Iceberg | Docker demo, native lakehouse path |
+| `staging` / `prod` | — | Planned — schema mirrors prod; `max_active_runs=1` on marts DAG |
 
 ## Related ADRs
 

@@ -1,3 +1,5 @@
+# Canonical pipeline dependencies (local dev, CI, quality gate)
+# Airflow Docker installs via orchestration/airflow/requirements.txt (-r this file)
 dbt-duckdb>=1.9.0
 dbt-trino>=1.8.0
 duckdb>=1.1.0

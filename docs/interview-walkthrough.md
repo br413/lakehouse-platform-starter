@@ -1,5 +1,7 @@
 # Interview Architecture Walkthrough
 
+> **See also:** [README](../README.md) · [ARCHITECTURE.md](../ARCHITECTURE.md) · [ADRs](./decisions/)
+
 Use this doc to rehearse a 5–10 minute portfolio walkthrough for senior data engineer interviews.
 
 ## 30-second pitch

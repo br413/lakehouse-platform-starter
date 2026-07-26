@@ -2,7 +2,7 @@ name: Deploy dbt docs
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -16,6 +16,7 @@ concurrency:
 
 jobs:
   build:
+    name: Build dbt docs site
     runs-on: ubuntu-latest
     env:
       DUCKDB_PATH: ${{ github.workspace }}/storage/warehouse/dev.duckdb
@@ -27,24 +28,22 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install dbt
-        run: pip install dbt-duckdb duckdb
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
       - name: Prepare warehouse directory
         run: mkdir -p storage/warehouse
 
       - name: Seed bronze layer
-        run: python ingestion/ingest_events.py
-        env:
-          DUCKDB_PATH: ${{ github.workspace }}/storage/warehouse/dev.duckdb
+        run: python ingestion/run_ingest.py
 
       - name: Build project and generate docs
         working-directory: transform/dbt
         run: |
           dbt deps
-          dbt seed
-          dbt build
-          dbt docs generate --no-compile
+          dbt seed --target dev
+          dbt build --target dev
+          dbt docs generate --target dev --no-compile
 
       - name: Prepare static site
         run: |
@@ -57,6 +56,7 @@ jobs:
           path: _site
 
   deploy:
+    name: Deploy to GitHub Pages
     needs: build
     runs-on: ubuntu-latest
     environment:

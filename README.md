@@ -81,12 +81,24 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) and [docs/decisions/](./docs/decisions/
 
 ## Quick start
 
+**Entry point:** `pip install -r requirements.txt` then `make pipeline` (or `make help` for all targets).
+
+| Path | Command | Time |
+|------|---------|------|
+| Fast (no Docker) | `make pipeline` | ~30s |
+| Full lakehouse | `docker compose up -d` → trigger `lakehouse_daily` | ~2 min |
+| Iceberg CLI | `make pipeline-iceberg` (stack must be up) | ~1 min |
+| Smoke test | `make test` | ~30s |
+
+Windows: use `.\scripts\pipeline.ps1` or `.\scripts\pipeline-iceberg.ps1` instead of `make`.
+
+Environment variables (`DBT_TARGET`, `DUCKDB_PATH`, etc.) are documented in [ARCHITECTURE.md](./ARCHITECTURE.md#environment-variables).
+
 ### Fast path — no Docker (~30 seconds)
 
 ```bash
 pip install -r requirements.txt
-make pipeline          # Linux/macOS
-# .\scripts\pipeline.ps1   # Windows
+make pipeline
 ```
 
 Bronze ingest → dbt seed/build → Great Expectations → populated `fct_daily_events` mart.
@@ -108,8 +120,21 @@ docker compose up -d
 Trigger DAG **`lakehouse_daily`** — uses `DBT_TARGET=iceberg` (PyIceberg → Trino → dbt-trino → Iceberg marts).
 
 ```bash
-make pipeline-iceberg   # or .\scripts\pipeline-iceberg.ps1
+make pipeline-iceberg
 ```
+
+### Makefile targets
+
+Run `make help` for the full list. Common targets:
+
+| Target | Description |
+|--------|-------------|
+| `pipeline` | DuckDB path: ingest → dbt → GE |
+| `pipeline-iceberg` | Trino/Iceberg path (Docker required) |
+| `test` | End-to-end smoke test |
+| `docs` | Generate local dbt docs |
+| `lint` | dbt compile/parse + DAG syntax check |
+| `up` / `down` | Start/stop Docker stack |
 
 ### Interview prep
 
@@ -160,7 +185,8 @@ docs/           ADRs, runbooks, interview walkthrough
 
 | Doc | Purpose |
 |-----|---------|
-| [ARCHITECTURE.md](./ARCHITECTURE.md) | Stack, data flow, env strategy |
+| [CONTRIBUTING.md](./CONTRIBUTING.md) | Dev setup, PR guidelines |
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | Stack, data flow, env vars |
 | [docs/interview-walkthrough.md](./docs/interview-walkthrough.md) | Interview demo script + Q&A |
 | [docs/decisions/](./docs/decisions/) | ADRs (Iceberg, thin orchestration, OpenLineage) |
 | [docs/runbooks/backfill-safety.md](./docs/runbooks/backfill-safety.md) | Backfill checklist |
@@ -172,5 +198,12 @@ docs/           ADRs, runbooks, interview walkthrough
 
 **Author:** [Bobby Ray (br413)](https://github.com/br413) · Senior Data Engineer  
 **Portfolio:** [br413.github.io](https://br413.github.io/) · **License:** [Apache 2.0](LICENSE)
+
+<details>
+<summary>GitHub social preview (repo maintainers)</summary>
+
+Export `docs/assets/social-preview.svg` to PNG (1280×640 recommended) as `docs/assets/social-preview.png`, then upload under **Settings → General → Social preview**. The SVG banner above is the source asset.
+
+</details>
 
 </div>

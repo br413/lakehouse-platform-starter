@@ -8,6 +8,7 @@ on:
 
 jobs:
   dbt-build:
+    name: dbt build
     runs-on: ubuntu-latest
     env:
       DUCKDB_PATH: ${{ github.workspace }}/storage/warehouse/dev.duckdb
@@ -17,9 +18,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install dbt-duckdb dbt-trino duckdb
+      - run: pip install -r requirements.txt
       - run: mkdir -p storage/warehouse
-      - run: python ingestion/ingest_events.py
+      - run: python ingestion/run_ingest.py
       - run: dbt deps
         working-directory: transform/dbt
       - run: dbt seed --target dev
@@ -30,6 +31,7 @@ jobs:
         working-directory: transform/dbt
 
   pipeline-test:
+    name: pipeline smoke test
     runs-on: ubuntu-latest
     env:
       DUCKDB_PATH: ${{ github.workspace }}/storage/warehouse/dev.duckdb
@@ -39,21 +41,23 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install dbt-duckdb duckdb great-expectations
+      - run: pip install -r requirements.txt
       - run: mkdir -p storage/warehouse
       - run: python -m unittest tests.test_pipeline -v
 
   airflow-dag-parse:
+    name: Airflow DAG parse
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install apache-airflow==3.1.0 astronomer-cosmos>=1.11.0
+      - run: pip install apache-airflow==3.1.0 -r orchestration/airflow/requirements.txt
       - run: python -m py_compile orchestration/airflow/dags/lakehouse_daily.py
 
   terraform-validate:
+    name: Terraform validate
     runs-on: ubuntu-latest
     defaults:
       run:
