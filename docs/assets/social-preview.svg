@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -13,10 +14,10 @@
   <rect width="1280" height="640" fill="url(#bg)"/>
   <rect x="60" y="60" width="1160" height="520" rx="24" fill="none" stroke="#30363d" stroke-width="2"/>
   <text x="100" y="160" fill="#f0f6fc" font-family="Segoe UI, system-ui, sans-serif" font-size="52" font-weight="700">lakehouse-platform-starter</text>
-  <text x="100" y="220" fill="#8b949e" font-family="Segoe UI, system-ui, sans-serif" font-size="28">Airflow · Cosmos · dbt · Iceberg · Trino · OpenLineage</text>
+  <text x="100" y="220" fill="#8b949e" font-family="Segoe UI, system-ui, sans-serif" font-size="28">Airflow &#183; Cosmos &#183; dbt &#183; Iceberg &#183; Trino &#183; OpenLineage</text>
   <rect x="100" y="270" width="1080" height="4" fill="url(#accent)"/>
   <text x="100" y="340" fill="#c9d1d9" font-family="Segoe UI, system-ui, sans-serif" font-size="24">Production-grade reference architecture for modern data platforms</text>
-  <text x="100" y="390" fill="#8b949e" font-family="Segoe UI, system-ui, sans-serif" font-size="20">Medallion pipelines · incremental marts · quality gates · IaC · CI/CD</text>
+  <text x="100" y="390" fill="#8b949e" font-family="Segoe UI, system-ui, sans-serif" font-size="20">Medallion pipelines &#183; incremental marts &#183; quality gates &#183; IaC &#183; CI/CD</text>
   <circle cx="180" cy="480" r="8" fill="#238636"/>
   <text x="200" y="486" fill="#7ee787" font-family="Segoe UI, system-ui, sans-serif" font-size="18">Runnable end-to-end</text>
   <circle cx="480" cy="480" r="8" fill="#1f6feb"/>
