@@ -1,0 +1,47 @@
+# GitHub Pages landing page for dbt docs site
+# Redirects visitors to the dbt docs overview when deployed alongside target/
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>lakehouse-platform-starter · dbt docs</title>
+  <meta name="description" content="dbt documentation for lakehouse-platform-starter — staging, intermediate, and mart models with tests and lineage.">
+  <meta property="og:title" content="lakehouse-platform-starter · dbt docs">
+  <meta property="og:description" content="Medallion dbt project: bronze → staging → marts with 14 data tests and incremental models.">
+  <meta property="og:type" content="website">
+  <link rel="canonical" href="https://br413.github.io/lakehouse-platform-starter/">
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      margin: 0; min-height: 100vh; display: grid; place-items: center;
+      font-family: system-ui, sans-serif; background: #0d1117; color: #c9d1d9;
+    }
+    main { text-align: center; max-width: 42rem; padding: 2rem; }
+    h1 { color: #f0f6fc; font-size: 1.75rem; }
+    p { line-height: 1.6; color: #8b949e; }
+    a {
+      display: inline-block; margin: 0.5rem; padding: 0.75rem 1.25rem;
+      border-radius: 8px; text-decoration: none; font-weight: 600;
+    }
+    .primary { background: #238636; color: #fff; }
+    .secondary { border: 1px solid #30363d; color: #79c0ff; }
+  </style>
+  <script>
+    // Auto-open dbt docs if index.html from dbt exists alongside this file
+    if (!location.hash && !location.search.includes('home=1')) {
+      window.location.replace('index.html#!/overview');
+    }
+  </script>
+</head>
+<body>
+  <main>
+    <h1>lakehouse-platform-starter</h1>
+    <p>dbt documentation — models, tests, lineage, and column descriptions for the medallion lakehouse project.</p>
+    <a class="primary" href="index.html#!/overview">Open dbt docs</a>
+    <a class="secondary" href="https://github.com/br413/lakehouse-platform-starter">View repository</a>
+    <a class="secondary" href="https://br413.github.io/">Portfolio</a>
+  </main>
+</body>
+</html>

@@ -50,6 +50,7 @@ jobs:
         run: |
           mkdir -p _site
           cp -r transform/dbt/target/* _site/
+          cp docs/pages/index.html _site/home.html
 
       - uses: actions/upload-pages-artifact@v3
         with:
