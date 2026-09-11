@@ -14,13 +14,23 @@
 [![Trino](https://img.shields.io/badge/Trino-SQL-DD00A1)](https://trino.io/)
 [![Terraform](https://img.shields.io/badge/Terraform-IaC-844FBA?logo=terraform&logoColor=white)](https://www.terraform.io/)
 
-[**Live dbt docs**](https://br413.github.io/lakehouse-platform-starter/) · [**Interview walkthrough**](docs/interview-walkthrough.md) · [**Portfolio**](https://br413.github.io/) · [**Open Airflow PR #70185**](https://github.com/apache/airflow/pull/70185)
+[**Live dbt docs**](https://br413.github.io/lakehouse-platform-starter/) · [**Quick start**](docs/QUICKSTART.md) · [**Interview walkthrough**](docs/interview-walkthrough.md) · [**Portfolio**](https://br413.github.io/)
 
 <img src="docs/assets/social-preview.svg" alt="lakehouse-platform-starter architecture banner" width="920"/>
 
 </div>
 
 ---
+
+**Try it in ~30 seconds** (no Docker):
+
+```bash
+git clone https://github.com/br413/lakehouse-platform-starter.git
+cd lakehouse-platform-starter
+pip install -r requirements.txt && make pipeline   # Windows: .\scripts\demo.ps1
+```
+
+Success = dbt tests green + Great Expectations pass + rows in `fct_daily_events`.
 
 **Airflow + Cosmos** → **dbt** → **Iceberg** → **OpenLineage** → **Great Expectations**
 
@@ -81,27 +91,36 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) and [docs/decisions/](./docs/decisions/
 
 ## Quick start
 
-**Entry point:** `pip install -r requirements.txt` then `make pipeline` (or `make help` for all targets).
+One-page guide: **[docs/QUICKSTART.md](./docs/QUICKSTART.md)**.
 
 | Path | Command | Time |
 |------|---------|------|
-| Fast (no Docker) | `make pipeline` | ~30s |
+| Fast (no Docker) | `make pipeline` · Windows: `.\scripts\demo.ps1` | ~30–60s |
 | Full lakehouse | `docker compose up -d` → trigger `lakehouse_daily` | ~2 min |
 | Iceberg CLI | `make pipeline-iceberg` (stack must be up) | ~1 min |
-| Smoke test | `make test` | ~30s |
-
-Windows: use `.\scripts\pipeline.ps1` or `.\scripts\pipeline-iceberg.ps1` instead of `make`.
+| Smoke test | `make test` · Windows: `python -m unittest tests.test_pipeline -v` | ~30s |
 
 Environment variables (`DBT_TARGET`, `DUCKDB_PATH`, etc.) are documented in [ARCHITECTURE.md](./ARCHITECTURE.md#environment-variables).
 
-### Fast path — no Docker (~30 seconds)
+### Fast path — no Docker (~30–60 seconds)
 
 ```bash
 pip install -r requirements.txt
-make pipeline
+make pipeline          # macOS / Linux
+# Windows:
+.\scripts\demo.ps1
 ```
 
-Bronze ingest → dbt seed/build → Great Expectations → populated `fct_daily_events` mart.
+What runs: bronze ingest → dbt seed/build → Great Expectations → `fct_daily_events` mart.
+
+**You should see:**
+
+```text
+Pipeline complete.   # or: Demo OK
+MART_ROWS=<n>        # demo.ps1 prints sample mart rows
+```
+
+Then open `storage/warehouse/dev.duckdb` (or re-run `make test`) to confirm the mart is non-empty.
 
 ### Full lakehouse stack — Docker
 
@@ -162,9 +181,9 @@ Rehearse from **[docs/interview-walkthrough.md](./docs/interview-walkthrough.md)
 
 | Item | Link | Status |
 |------|------|--------|
-| Flagship issue | [apache/airflow#68661](https://github.com/apache/airflow/issues/68661) | RUN-level OpenLineage for dbt Cloud |
-| **Open PR** | [**#70185**](https://github.com/apache/airflow/pull/70185) | dbt Cloud job metadata on OL events |
-| Quick win | [#47160](https://github.com/apache/airflow/issues/47160) | Python 3.12 fork() fix |
+| **Open PR** | [Airflow #70171](https://github.com/apache/airflow/pull/70171) | Surface dbt Cloud failure details in task logs (CI green) |
+| Merged | [Airflow #71158](https://github.com/apache/airflow/pull/71158) | Clarify metrics vs traces `otel_*` options |
+| Related issue | [apache/airflow#68661](https://github.com/apache/airflow/issues/68661) | RUN-level OpenLineage for dbt Cloud |
 
 Playbook: [oss/AIRFLOW_CONTRIBUTIONS.md](./oss/AIRFLOW_CONTRIBUTIONS.md)
 
@@ -185,6 +204,7 @@ docs/           ADRs, runbooks, interview walkthrough
 
 | Doc | Purpose |
 |-----|---------|
+| [docs/QUICKSTART.md](./docs/QUICKSTART.md) | Clone → first successful pipeline |
 | [CONTRIBUTING.md](./CONTRIBUTING.md) | Dev setup, PR guidelines |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Stack, data flow, env vars |
 | [docs/interview-walkthrough.md](./docs/interview-walkthrough.md) | Interview demo script + Q&A |

@@ -6,7 +6,7 @@ Use this doc to rehearse a 5–10 minute portfolio walkthrough for senior data e
 
 ## 30-second pitch
 
-> "I built a production-style lakehouse reference platform: PyIceberg lands events in Iceberg bronze on MinIO, Trino queries the REST catalog, dbt transforms through staging → intermediate → incremental marts, Airflow + Cosmos orchestrates per-model tasks, OpenLineage feeds Marquez, and Great Expectations gates publish. CI runs the full DuckDB path; Docker runs the native Iceberg + Trino path. I also have an open Airflow PR for dbt Cloud OpenLineage."
+> "I built a production-style lakehouse reference platform: PyIceberg lands events in Iceberg bronze on MinIO, Trino queries the REST catalog, dbt transforms through staging → intermediate → incremental marts, Airflow + Cosmos orchestrates per-model tasks, OpenLineage feeds Marquez, and Great Expectations gates publish. CI runs the full DuckDB path; Docker runs the native Iceberg + Trino path. Upstream: merged Airflow otel docs (#71158) and an open PR surfacing dbt Cloud failure details in task logs (#70171)."
 
 ## Stack at a glance
 
@@ -68,10 +68,11 @@ flowchart TB
 ```bash
 pip install -r requirements.txt
 make pipeline          # ingest → dbt build → GE gate
+# Windows: .\scripts\demo.ps1   (prints MART_ROWS + sample)
 make docs              # optional: show dbt docs site
 ```
 
-Point out: 14 dbt tests, incremental mart, GE publish gate.
+Point out: 14 dbt tests, incremental mart, GE publish gate, ~30–60s to first success.
 
 ### Full path (Docker) — for "real lakehouse" questions
 
