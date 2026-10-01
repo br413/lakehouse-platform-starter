@@ -5,7 +5,7 @@ description = "Production-grade lakehouse reference architecture — Airflow, db
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "Apache-2.0" }
-authors = [{ name = "Bobby Ray", email = "br413@users.noreply.github.com" }]
+authors = [{ name = "br413", email = "br413@users.noreply.github.com" }]
 
 [tool.ruff]
 line-length = 100

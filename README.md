@@ -216,7 +216,7 @@ docs/           ADRs, runbooks, interview walkthrough
 
 <div align="center">
 
-**Author:** [Bobby Ray (br413)](https://github.com/br413) · Senior Data Engineer  
+**Author:** [br413](https://github.com/br413) · Senior Data Engineer<br>
 **Portfolio:** [br413.github.io](https://br413.github.io/) · **License:** [Apache 2.0](LICENSE)
 
 <details>
